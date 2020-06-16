@@ -25,6 +25,24 @@ var format = inspector.DetermineFileFormat(stream);
 This will return a FileFormat instance which contains the signature and media type of the recognised format,
 or null if a matching format could not be determined.
 
+## How do I register it with a dependency injection container?
+
+You can either register an instance calling the empty constructor which will register all formats in the FileSignatures assembly:
+
+```cs
+services.AddSingleton<IFileFormatInspector>(new FileFormatInspector());
+```
+
+Or use `FileFormatLocator` to scan for the formats you are interested in then pass that to the constructor of `FileFormatInspector` and register that instance:
+
+```cs
+var recognised = FileFormatLocator.GetFormats().OfType<Image>();
+var inspector = new FileFormatInspector(recognised);
+services.AddSingleton<IFileFormatInspector>(inspector);
+```
+    
+In this example, only formats which derive from `Image` (jpg, tiff, bmp, etc.) will be detected.  Anything else will be ignored.
+
 ## How do I check for a type of file?
 
 Because the formats are defined as a type hierarchy, you can either check for a specific type if you want
@@ -53,24 +71,30 @@ See the examples for a sample [web application](https://github.com/neilharvey/Fi
 
 Currently, the following formats are built-in:
 
-| Name               | Media-Type                                                                | Extension
-|--------------------|---------------------------------------------------------------------------|--------
-| Bitmap             | image/bitmap                                                              | .bmp
-| Excel              | application/vnd.openxmlformats-officedocument.spreadsheetml.sheet         | .xlsx
-| Excel 97-2003      | application/vnd.ms-excel                                                  | .xls
-| Windows Executable | application/octet-stream                                                  | .exe
-| GIF                | image/gif                                                                 | .gif
-| JPEG               | image/jpeg                                                                | .jpeg
-| PDF                | application/pdf                                                           | .pdf
-| PNG                | image/png                                                                 | .png
-| PowerPoint         | application/vnd.openxmlformats-officedocument.presentationml.presentation | .pptx
-| Powerpoint 97-2003 | application/vnd.ms-powerpoint                                             | .ppt
-| Rich Text Format   | application/rtf                                                           | .rtf
-| TIFF               | image/tiff                                                                | .tif
-| Word               | application/vnd.openxmlformats-officedocument.wordprocessingml.document   | .docx
-| Word 97-2003       | application/msword                                                        | .doc
-| Xps                | application/vnd.ms-xpsdocument                                            | .xps
-| Zip                | application/zip                                                           | .zip
+| Name                       | Media-Type                                                                | Extension
+|----------------------------|---------------------------------------------------------------------------|--------
+| Bitmap                     | image/bitmap                                                              | .bmp
+| Excel                      | application/vnd.openxmlformats-officedocument.spreadsheetml.sheet         | .xlsx
+| Excel 97-2003              | application/vnd.ms-excel                                                  | .xls
+| Windows Executable         | application/octet-stream                                                  | .exe
+| GIF                        | image/gif                                                                 | .gif
+| JPEG                       | image/jpeg                                                                | .jpeg
+| Open Document Presentation | application/vnd.oasis.opendocument.presentationn                          | .odp
+| Open Document Spreadhseet  | application/vnd.oasis.opendocument.spreadsheet                            | .ods
+| Open Document Text         | application/vnd.oasis.opendocument.text                                   | .odt
+| Outlook Message            | application/vnd.ms-outlook                                                | .msg
+| PDF                        | application/pdf                                                           | .pdf
+| PNG                        | image/png                                                                 | .png
+| PowerPoint                 | application/vnd.openxmlformats-officedocument.presentationml.presentation | .pptx
+| Powerpoint 97-2003         | application/vnd.ms-powerpoint                                             | .ppt
+| Rich Text Format           | application/rtf                                                           | .rtf
+| TIFF                       | image/tiff                                                                | .tif
+| Visio                      | application/vnd.visio                                                     | .vsdx
+| Visio 97-2003              | application/vnd.visio                                                     | .vsd
+| Word                       | application/vnd.openxmlformats-officedocument.wordprocessingml.document   | .docx
+| Word 97-2003               | application/msword                                                        | .doc
+| Xps                        | application/vnd.ms-xpsdocument                                            | .xps
+| Zip                        | application/zip                                                           | .zip
 
 ## How do I add additional formats?
 
